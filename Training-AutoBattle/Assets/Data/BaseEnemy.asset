@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b28339ad71e1e149b95dff83d3dab63, type: 3}
+  m_Name: BaseEnemy
+  m_EditorClassIdentifier: 
+  <EnemyPrefab>k__BackingField: {fileID: 2751820020543830239, guid: a928edc696445e543bc41387dc2f7efc, type: 3}
+  <Health>k__BackingField: 5
+  <Damage>k__BackingField: 5
+  <Speed>k__BackingField: 5

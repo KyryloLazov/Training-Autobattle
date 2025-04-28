@@ -3,5 +3,5 @@ using UnityEngine;
 
 public interface ISpawnStrategy
 {
-    void SpawnEnemy(List<EnemyConfig> enemyConfigs, Factory factory, Vector3 spawnpoint, float offset);
+    void SpawnEnemy(List<EnemyConfig> enemyConfigs, Factory factory, Vector3 spawnpoint, float offset, int teamID);
 }

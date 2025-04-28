@@ -1,14 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class Factory : MonoBehaviour
 {
+    private DiContainer _container;
+    
+    [Inject]
+    public void Construct(DiContainer container)
+    {
+        _container = container;
+    }
+    
     public GameObject SpawnObject(GameObject prefab, Vector3 spawnPoint)
     {
         if (spawnPoint == null) return null;
-        
-        GameObject gameObject = Instantiate(prefab, spawnPoint, Quaternion.identity);
+
+        GameObject gameObject = _container.InstantiatePrefab(prefab);
+        gameObject.transform.position = spawnPoint;
         return gameObject;
     }
 }

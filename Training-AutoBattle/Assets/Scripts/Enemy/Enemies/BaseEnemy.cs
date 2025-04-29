@@ -8,22 +8,24 @@ public class BaseEnemy : MonoBehaviour, IEnemy
 {
     [SerializeField] private HealthView _healthView;
     public float Health { get; set; }
-    public int TeamID { get; set; }
+    public TeamIdentifiers TeamID { get; set; }
+
     public Vector3 Position
     {
         get => transform.position;
         set => transform.position = value;
     }
 
-    public bool IsDead { get; set; }
+    public ReactiveProperty<bool> IsDead { get; set; } = new();
 
     private float _speed;
     private float _damage;
     private float _range;
-    private bool _inRange;
+    private ReactiveProperty<bool> _inRange = new();
 
     private List<IEnemy> _enemies = new();
     private IEnemy _closestEnemy;
+    private ReactiveProperty<IEnemy> _fightingTarget = new();
 
     private IAttackStrategy _attackStrategy;
     private AttackStrategiesConfig _config;
@@ -31,21 +33,23 @@ public class BaseEnemy : MonoBehaviour, IEnemy
 
     private HealthPresenter _healthPresenter;
     private HealthModel _healthModel;
+    private EnemySeeker _enemySeeker;
 
     [Inject]
-    private void Construct(AttackStrategiesConfig config, StrategyChooser chooser)
+    private void Construct(AttackStrategiesConfig config, StrategyChooser chooser, EnemySeeker seeker)
     {
         _config = config;
         _chooser = chooser;
+        _enemySeeker = seeker;
     }
-    
-    public void Initialize(EnemyConfig config, int teamID)
+
+    public void Initialize(EnemyConfig config, TeamIdentifiers teamID)
     {
         Health = config.Health;
         _speed = config.Speed;
         _damage = config.Damage;
         _range = config.Range;
-        IsDead = false;
+        IsDead.Value = false;
         TeamID = teamID;
         _healthModel = new HealthModel(Health);
         _healthPresenter = new HealthPresenter(_healthModel, _healthView);
@@ -57,7 +61,7 @@ public class BaseEnemy : MonoBehaviour, IEnemy
     private void Start()
     {
         IEnemy[] allEnemies = FindObjectsOfType<MonoBehaviour>().OfType<IEnemy>().ToArray();
-        
+
         foreach (var enemy in allEnemies)
         {
             if (enemy.TeamID != TeamID)
@@ -67,56 +71,61 @@ public class BaseEnemy : MonoBehaviour, IEnemy
         }
 
         _attackStrategy = _chooser.ChooseStrategy(_config);
+
+        FindClosestEnemy();
+        
+        _fightingTarget
+            .Where(target => target != null)
+            .SelectMany(target => target.IsDead.Where(d => d))
+            .Subscribe(_ =>
+            {
+                _fightingTarget.Value = null;
+                FindClosestEnemy();
+            })
+            .AddTo(this);
+        
+        // _inRange
+        //     .Where(inRange => inRange)
+        //     .Subscribe(_ => Attack())
+        //     .AddTo(this);
     }
 
     void Update()
     {
-        FindClosestEnemy();
         CheckDistance();
         MoveToEnemy();
-        Attack();
+
+        if (_inRange.Value && _fightingTarget.Value != null)
+        {
+            Attack();
+        }
     }
+
 
     private void FindClosestEnemy()
     {
-        if (_enemies.Count <= 0 && !_closestEnemy.IsDead) return;
-        float shortestDistance = float.MaxValue;
-
-        for (int i = _enemies.Count - 1; i >= 0; i--)
-        {
-            var enemy = _enemies[i];
-            if (enemy == null || (enemy as MonoBehaviour) == null)
-            {
-                _enemies.RemoveAt(i);
-                continue;
-            }
-
-            float distance = Vector3.Distance(transform.position, enemy.Position);
-            if (distance < shortestDistance)
-            {
-                shortestDistance = distance;
-                _closestEnemy = enemy;
-            }
-        }
+        var alive = _enemies.Where(e => !e.IsDead.Value).ToList();
+        _fightingTarget.Value = _enemySeeker.FindClosestEnemy(alive, Position);
     }
 
     private void CheckDistance()
     {
-        if (_closestEnemy == null || _closestEnemy.IsDead) return;
-        _inRange = Vector3.Distance(Position, _closestEnemy.Position) <= _range;
+        var target = _fightingTarget.Value;
+        if (target == null) return;
+        _inRange.Value = Vector3.Distance(Position, target.Position) <= _range;
     }
+
 
     private void MoveToEnemy()
     {
-        if (_closestEnemy == null || _closestEnemy.IsDead || _inRange) return;
-        Vector3 direction = (_closestEnemy.Position - Position).normalized;
+        if (_fightingTarget.Value == null) return;
+        Vector3 direction = (_fightingTarget.Value.Position - Position).normalized;
         transform.Translate(direction * (_speed * Time.deltaTime));
     }
 
     private void Attack()
     {
-        if (!_inRange || _closestEnemy.IsDead) return;
-        _attackStrategy.Attack(_damage, _closestEnemy);
+        _attackStrategy.Attack(_damage, _fightingTarget.Value);
     }
 
     public void TakeDamage(float damage)
@@ -126,7 +135,7 @@ public class BaseEnemy : MonoBehaviour, IEnemy
 
     private void Die()
     {
-        IsDead = true;
+        IsDead.Value = true;
         Destroy(gameObject);
     }
 }

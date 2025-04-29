@@ -18,8 +18,8 @@ public class EnemySpawner
         _configs = enemies;
     }
 
-    public void SpawnEnemies(Vector3 spawnPosition, float offset, int TeamID)
+    public void SpawnEnemies(TeamConfig teamConfig)
     {
-        _spawnStrategy.SpawnEnemy(_configs, _factory, spawnPosition, offset, TeamID);
+        _spawnStrategy.SpawnEnemy(teamConfig, _factory);
     }
 }

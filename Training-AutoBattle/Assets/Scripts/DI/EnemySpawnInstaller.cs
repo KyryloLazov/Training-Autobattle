@@ -18,5 +18,6 @@ public class EnemySpawnInstaller : MonoInstaller
         Container.Bind<EnemySpawner>().AsSingle();
         Container.Bind<AttackStrategiesConfig>().FromInstance(_attacksConfig).AsSingle();
         Container.Bind<StrategyChooser>().AsSingle();
+        Container.Bind<EnemySeeker>().AsSingle();
     }
 }

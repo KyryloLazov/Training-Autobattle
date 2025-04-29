@@ -403,6 +403,7 @@
 "Assets/Scripts/Enemy/Enemies/AttackStrategy/OneShotAttackStrategy.cs"
 "Assets/Scripts/Enemy/Enemies/AttackStrategy/StrategyChooser.cs"
 "Assets/Scripts/Enemy/Enemies/BaseEnemy.cs"
+"Assets/Scripts/Enemy/Enemies/EnemySeeker.cs"
 "Assets/Scripts/Enemy/Enemies/HealthBar/HealthModel.cs"
 "Assets/Scripts/Enemy/Enemies/HealthBar/HealthPresenter.cs"
 "Assets/Scripts/Enemy/Enemies/HealthBar/HealthView.cs"
@@ -415,6 +416,9 @@
 "Assets/Scripts/GameInitializer/Config/GameConfig.cs"
 "Assets/Scripts/GameInitializer/Enums/TeamIdentifiers.cs"
 "Assets/Scripts/GameInitializer/GameInitializer.cs"
+"Assets/Scripts/GameInitializer/GameStates.cs"
+"Assets/Scripts/GameInitializer/InitializerView.cs"
+"Assets/Scripts/GameInitializer/Team/TeamConfig.cs"
 -langversion:9.0
 
 /deterministic
